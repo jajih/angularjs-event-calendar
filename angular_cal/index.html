@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="cal">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" href="node_modules/bootstrap/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="node_modules/angular-bootstrap-calendar/dist/css/angular-bootstrap-calendar.min.css">
+    <link rel="stylesheet" href="node_modules/angular/angular-csp.css">
+</head>
+<body ng-controller="mainController as vm" ng-cloak>
+
+<h2 class="text-center">{{ vm.calendarTitle }}</h2>
+
+<div class="row">
+
+    <div class="col-md-6 text-center">
+        <div class="btn-group">
+            <button
+                    class="btn btn-primary"
+                    mwl-date-modifier
+                    date="vm.viewDate"
+                    decrement="vm.calendarView">
+                Previous
+            </button>
+            <button
+                    class="btn btn-default"
+                    mwl-date-modifier
+                    date="vm.viewDate"
+                    set-to-today>
+                Today
+            </button>
+            <button
+                    class="btn btn-primary"
+                    mwl-date-modifier
+                    date="vm.viewDate"
+                    increment="vm.calendarView">
+                Next
+            </button>
+        </div>
+    </div>
+
+    <br class="visible-xs visible-sm">
+
+    <div class="col-md-6 text-center">
+        <div class="btn-group">
+            <label class="btn btn-primary" ng-model="vm.calendarView" uib-btn-radio="'year'">Year</label>
+            <label class="btn btn-primary" ng-model="vm.calendarView" uib-btn-radio="'month'">Month</label>
+            <label class="btn btn-primary" ng-model="vm.calendarView" uib-btn-radio="'week'">Week</label>
+            <label class="btn btn-primary" ng-model="vm.calendarView" uib-btn-radio="'day'">Day</label>
+        </div>
+    </div>
+
+</div>
+
+<br>
+
+<mwl-calendar
+        events="vm.events"
+        view="vm.calendarView"
+        view-title="vm.calendarTitle"
+        view-date="vm.viewDate"
+        on-event-click="vm.eventClicked(calendarEvent)"
+        on-event-times-changed="vm.eventTimesChanged(calendarEvent); calendarEvent.startsAt = calendarNewEventStart; calendarEvent.endsAt = calendarNewEventEnd"
+        edit-event-html="'<i class=\'glyphicon glyphicon-pencil\'></i>'"
+        delete-event-html="'<i class=\'glyphicon glyphicon-remove\'></i>'"
+        on-edit-event-click="vm.eventEdited(calendarEvent)"
+        on-delete-event-click="vm.eventDeleted(calendarEvent)"
+        cell-is-open="vm.isCellOpen"
+        day-view-start="06:00"
+        day-view-end="22:00"
+        day-view-split="30"
+        cell-modifier="vm.modifyCell(calendarCell)">
+</mwl-calendar>
+
+<br><br><br>
+
+<h3 id="event-editor">
+    Edit events
+    <button
+            class="btn btn-primary pull-right"
+            ng-click="vm.events.push({title: 'New event', type: 'important', draggable: true, resizable: true})">
+        Add new
+    </button>
+    <div class="clearfix"></div>
+</h3>
+{{vm.events[0]}}
+<table class="table table-bordered">
+
+    <thead>
+    <tr>
+        <th>Title</th>
+        <th>Address</th>
+        <th>Type</th>
+        <th>Starts at</th>
+        <th>Ends at</th>
+        <th>Remove</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    <tr ng-repeat="event in vm.events track by $index">
+        <td>
+            <input
+                    type="text"
+                    class="form-control"
+                    ng-model="event.title">
+        </td>
+        <td>
+            <input
+                    type="text"
+                    ng-minlength="10"
+                    class="form-control"
+                    ng-model="event.address">
+        </td>
+        <td>
+            <select ng-model="event.type" class="form-control">
+                <option value="important">Important</option>
+                <option value="warning">Warning</option>
+                <option value="info">Info</option>
+                <option value="inverse">Inverse</option>
+                <option value="success">Success</option>
+                <option value="special">Special</option>
+            </select>
+        </td>
+        <td>
+            <p class="input-group" style="max-width: 250px">
+                <input
+                        type="text"
+                        class="form-control"
+                        readonly
+                        uib-datepicker-popup="dd MMMM yyyy"
+                        ng-model="event.startsAt"
+                        is-open="event.startOpen"
+                        close-text="Close" >
+            <span class="input-group-btn">
+              <button
+                      type="button"
+                      class="btn btn-default"
+                      ng-click="vm.toggle($event, 'startOpen', event)">
+                <i class="glyphicon glyphicon-calendar"></i>
+              </button>
+            </span>
+            </p>
+            <uib-timepicker
+                    ng-model="event.startsAt"
+                    hour-step="1"
+                    minute-step="15"
+                    show-meridian="true">
+            </uib-timepicker>
+        </td>
+        <td>
+            <p class="input-group" style="max-width: 250px">
+                <input
+                        type="text"
+                        class="form-control"
+                        readonly
+                        uib-datepicker-popup="dd MMMM yyyy"
+                        ng-model="event.endsAt"
+                        is-open="event.endOpen"
+                        close-text="Close">
+            <span class="input-group-btn">
+              <button
+                      type="button"
+                      class="btn btn-default"
+                      ng-click="vm.toggle($event, 'endOpen', event)">
+                <i class="glyphicon glyphicon-calendar"></i>
+              </button>
+            </span>
+            </p>
+            <uib-timepicker
+                    ng-model="event.endsAt"
+                    hour-step="1"
+                    minute-step="15"
+                    show-meridian="true">
+            </uib-timepicker>
+        </td>
+        <td>
+            <button
+                    class="btn btn-danger"
+                    ng-click="vm.events.splice($index, 1)">
+                Delete
+            </button>
+        </td>
+    </tr>
+    </tbody>
+
+</table>
+
+    <!--non angular stuff.-->
+    <script type="text/javascript" src="node_modules/moment/min/moment.min.js"></script>
+
+
+    <script type="text/javascript" src="node_modules/angular/angular.js"></script>
+
+    <!--angular library / vendor modules-->
+    <script src="node_modules/angular-bootstrap-calendar/dist/js/angular-bootstrap-calendar-tpls.min.js"></script>
+
+    <script type="text/javascript" src="node_modules/angular-ui-bootstrap/dist/ui-bootstrap.js"></script>
+    <script type="text/javascript" src="node_modules/angular-ui-bootstrap/dist/ui-bootstrap-tpls.js"></script>
+
+    <!-- your angular files-->
+    <script type="text/javascript" src="app/app.js"></script>
+
+    <script type="text/ng-template" id="app/views/calendarDetailCustom.html">
+        <div class="cal-slide-box" uib-collapse="vm.isCollapsed" mwl-collapse-fallback="vm.isCollapsed">
+            <div class="cal-slide-content cal-event-list">
+                <ul class="unstyled list-unstyled">
+
+                    <li
+                            ng-repeat="event in vm.events | orderBy:'startsAt' track by event.$id"
+                            ng-class="event.cssClass"
+                            mwl-draggable="event.draggable === true"
+                            drop-data="{event: event}">
+                        <span class="pull-left event" ng-class="'event-' + event.type"></span>
+                        &nbsp;
+                        <a
+                                href="javascript:;"
+                                class="event-item"
+                                ng-click="vm.onEventClick({calendarEvent: event})">
+                            <span ng-bind-html="vm.$sce.trustAsHtml(event.title)"></span>
+                            (<span ng-bind="event.startsAt | calendarDate:(isMonthView ? 'time' : 'datetime'):true"></span><span ng-if="vm.calendarConfig.displayEventEndTimes && event.endsAt"> - <span ng-bind="event.endsAt | calendarDate:(isMonthView ? 'time' : 'datetime'):true"></span></span>)
+                            <span ng-if="event.address">(<span ng-bind="event.address"></span>)</span>
+                        </a>
+
+                        <a
+                                href="javascript:;"
+                                class="event-item-edit"
+                                ng-if="vm.editEventHtml && event.editable !== false"
+                                ng-bind-html="vm.$sce.trustAsHtml(vm.editEventHtml)"
+                                ng-click="vm.onEditEventClick({calendarEvent: event})">
+                        </a>
+
+                        <a
+                                href="javascript:;"
+                                class="event-item-delete"
+                                ng-if="vm.deleteEventHtml && event.deletable !== false"
+                                ng-bind-html="vm.$sce.trustAsHtml(vm.deleteEventHtml)"
+                                ng-click="vm.onDeleteEventClick({calendarEvent: event})">
+                        </a>
+                    </li>
+
+                </ul>
+            </div>
+        </div>
+
+    </script>
+
+
+</body>
+</html>
